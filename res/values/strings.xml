@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SuperRookie</string>
+    <string name="action_settings">Settings</string>    
+    <string name="turn_on">Turn on</string>
+    <string name="turn_off">Turn off</string>
+    <string name="detecting">Detecting</string>
+    <string name="not_detecting">Not detecting</string>
+    <string name="exit">Exit</string>
+</resources>
