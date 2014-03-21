@@ -6,6 +6,7 @@
     <string name="turn_off">Turn off</string>
     <string name="detecting">Detecting</string>
     <string name="not_detecting">Not detecting</string>
+    <string name="scan">Scan</string>
     <string name="exit">Exit</string>
     <string name="label_data">Data:</string>
     <string name="label_device_address">Device address:</string>

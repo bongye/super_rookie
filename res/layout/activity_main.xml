@@ -20,11 +20,19 @@
         android:text="@string/turn_on" />
 
     <Button
-        android:id="@+id/buttonExit"
+        android:id="@+id/buttonScan"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/buttonDetectToggle"
+        android:text="@string/scan" />
+
+    <Button
+        android:id="@+id/buttonExit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/buttonScan"
         android:text="@string/exit" />
 
 </RelativeLayout>
