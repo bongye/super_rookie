@@ -11,24 +11,24 @@ public class CallDetectService extends Service {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO Auto-generated method stub
 		callHelper = new CallHelper(this);
-		
+
 		int result = super.onStartCommand(intent, flags, startId);
 		callHelper.start();
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		
+
 		callHelper.stop();
-	}	
+	}
 }
 

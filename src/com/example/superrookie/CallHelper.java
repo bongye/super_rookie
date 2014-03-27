@@ -13,19 +13,19 @@ public class CallHelper {
 	private TelephonyManager telephonyManager;
 	private CallStateListener callStateListener;
 	private OutgoingReceiver outgoingReceiver;
-	
-	private class CallStateListener extends PhoneStateListener {				
+
+	private class CallStateListener extends PhoneStateListener {
 		@Override
 		public void onCallStateChanged(int state, String incomingNumber) {
 			// TODO Auto-generated method stub
 			switch (state) {
 			case TelephonyManager.CALL_STATE_RINGING:
 				Toast.makeText(context, "Incoming : " + incomingNumber, Toast.LENGTH_LONG).show();
-				
+
 			}
 		}
 	}
-	
+
 	private class OutgoingReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -34,22 +34,22 @@ public class CallHelper {
 			Toast.makeText(context, "Outgoing: " + number, Toast.LENGTH_LONG).show();
 		}
 	}
-	
+
 	public CallHelper(Context context) {
 		this.context = context;
-		
+
 		callStateListener = new CallStateListener();
 		outgoingReceiver = new OutgoingReceiver();
 	}
-	
+
 	public void start() {
 		telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 		telephonyManager.listen(callStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-		
+
 		IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
 		context.registerReceiver(outgoingReceiver, intentFilter);
 	}
-	
+
 	public void stop() {
 		telephonyManager.listen(callStateListener, PhoneStateListener.LISTEN_NONE);
 		context.unregisterReceiver(outgoingReceiver);
