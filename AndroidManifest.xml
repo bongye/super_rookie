@@ -37,8 +37,8 @@
             android:enabled="true"
             android:exported="false" >
         </service>
-        <activity android:name=".bluetooth.DeviceScanActivity" />
-        <activity android:name=".bluetooth.DeviceControlActivity"></activity>
-        <service android:name=".bluetooth.BluetoothLeService" android:enabled="true"/>
+        
+        <activity android:name=".bluetooth.DeviceListActivity" />
+        <service android:name=".bluetooth.BluetoothService" android:enabled="true" />
     </application>
 </manifest>
