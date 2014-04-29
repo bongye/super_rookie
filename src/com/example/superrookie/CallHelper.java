@@ -21,7 +21,10 @@ public class CallHelper {
 			switch (state) {
 			case TelephonyManager.CALL_STATE_RINGING:
 				Toast.makeText(context, "Incoming : " + incomingNumber, Toast.LENGTH_LONG).show();
-
+				break;
+			case TelephonyManager.CALL_STATE_OFFHOOK:
+				Toast.makeText(context,  "Call end :)", Toast.LENGTH_LONG).show();
+				break;
 			}
 		}
 	}
