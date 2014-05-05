@@ -13,8 +13,6 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 public class BluetoothService {
@@ -26,7 +24,7 @@ public class BluetoothService {
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
 	private final BluetoothAdapter mAdapter;
-	private final Handler mHandler;
+
 	private AcceptThread mAcceptThread;
 	private ConnectThread mConnectThread;
 	private ConnectedThread mConnectedThread;
@@ -37,16 +35,14 @@ public class BluetoothService {
 	public static final int STATE_CONNECTING = 2;
 	public static final int STATE_CONNECTED = 3;
 
-	public BluetoothService(Context context, Handler handler) {
+	public BluetoothService(Context context) {
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		mState = STATE_NONE;
-		mHandler = handler;
 	}
 
 	private synchronized void setState(int state) {
 		if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
 		mState = state;
-		mHandler.obtainMessage(MainActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
 	}
 
 	public synchronized int getState() {
@@ -115,11 +111,8 @@ public class BluetoothService {
 		mConnectedThread = new ConnectedThread(socket);
 		mConnectedThread.start();
 
-		Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
 		Bundle bundle = new Bundle();
 		bundle.putString(MainActivity.DEVICE_NAME, device.getName());
-		msg.setData(bundle);
-		mHandler.sendMessage(msg);
 
 		setState(STATE_CONNECTED);
 	}
@@ -155,22 +148,13 @@ public class BluetoothService {
 	}
 
 	private void connectionFailed() {
-		Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_TOAST);
-		Bundle bundle = new Bundle();
-		bundle.putString(MainActivity.TOAST, "Unable to connect device");
-		msg.setData(bundle);
-		mHandler.sendMessage(msg);
-
+		Log.e(TAG, "Connection failed");
 		BluetoothService.this.start();
 	}
 
 	private void connectionLost() {
-		Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_TOAST);
-		Bundle bundle = new Bundle();
-		bundle.putString(MainActivity.TOAST, "Device connection was lost");
-		msg.setData(bundle);
-		mHandler.sendMessage(msg);
-
+		Log.e(TAG, "Connection lost");
+		
 		BluetoothService.this.start();
 	}
 
@@ -270,7 +254,7 @@ public class BluetoothService {
 			}
 
 			synchronized (BluetoothService.this) {
-				mConnectedThread = null;
+				mConnectThread = null;
 			}
 			connected(mmSocket, mmDevice);
 		}
@@ -290,6 +274,7 @@ public class BluetoothService {
 		private final OutputStream mmOutputStream;
 
 		public ConnectedThread(BluetoothSocket socket) {
+			Log.d(TAG, "create ConnectedThread");
 			mmSocket = socket;
 			InputStream tmpIn = null;
 			OutputStream tmpOut = null;
@@ -307,12 +292,12 @@ public class BluetoothService {
 		public void run() {
 			if (D) Log.i(TAG, "BEGIN mConnectedThread");
 			byte[] buffer = new byte[1024];
-			int bytes;
-
+			
 			while (true) {
 				try {
-					bytes = mmInputStream.read(buffer);
-					mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+					mmInputStream.read(buffer);
+					String s = buffer.toString();
+					Log.i(TAG, "Message write : " + s);
 				} catch (IOException e) {
 					Log.e(TAG, "disconnected", e);
 					connectionLost();
@@ -325,7 +310,8 @@ public class BluetoothService {
 		public void write(byte[] buffer) {
 			try {
 				mmOutputStream.write(buffer);
-				mHandler.obtainMessage(MainActivity.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
+				String s = buffer.toString();
+				Log.i(TAG, "Message write : " + s);
 			} catch (IOException e) {
 				Log.e(TAG, "Exception during write", e);
 			}

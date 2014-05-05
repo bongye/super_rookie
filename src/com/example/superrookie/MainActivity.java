@@ -4,11 +4,8 @@ import com.example.superrookie.bluetooth.BluetoothService;
 import com.example.superrookie.bluetooth.DeviceListActivity;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.util.Log;
@@ -46,6 +43,7 @@ public class MainActivity extends Activity {
 
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothService mBluetoothService;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +57,11 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				setDetectEnabled(!detectEnabled);
+				if(!detectEnabled) {
+					Log.e(TAG, "device is not selected.");
+				} else {
+					setDetectEnabled(!detectEnabled, null);
+				}
 			}
 		});
 
@@ -79,7 +81,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				setDetectEnabled(false);
+				setDetectEnabled(false, null);
 				MainActivity.this.finish();
 			}
 		});
@@ -90,6 +92,7 @@ public class MainActivity extends Activity {
 			finish();
 			return;
 		}
+		
 	}
 
 
@@ -101,11 +104,18 @@ public class MainActivity extends Activity {
 		if (!mBluetoothAdapter.isEnabled()) {
 			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-		} else {
-			mBluetoothService = new BluetoothService(this, mHandler);
 		}
 	}
-	private void setDetectEnabled(boolean enable) {
+	
+	@Override
+	public void onDestroy() {
+		if (D) Log.i(TAG, "onDestroy");
+		
+		super.onDestroy();
+		if(mBluetoothService != null) mBluetoothService.stop();
+	}
+	
+	private void setDetectEnabled(boolean enable, String address) {
 		detectEnabled = enable;
 
 		Intent intent = new Intent(this, CallDetectService.class);
@@ -113,8 +123,10 @@ public class MainActivity extends Activity {
 		String buttonText;
 		String textViewText;
 		if (enable) {
+			if(null != address) {
+				intent.putExtra(CallDetectService.EXTRA_DEVICE_ADDRESS, address);
+			}
 			startService(intent);
-
 			buttonText = resources.getString(R.string.turn_off);
 			textViewText = resources.getString(R.string.detecting);
 		} else {
@@ -139,7 +151,7 @@ public class MainActivity extends Activity {
 			break;
 		case REQUEST_ENABLE_BT:
 			if (resultCode == Activity.RESULT_OK) {
-				mBluetoothService = new BluetoothService(this, mHandler);
+				//mBluetoothService = new BluetoothService(this, mHandler);
 			} else {
 				if (D) Log.d(TAG, "BT is not enabled");
 				Toast.makeText(this, "BT is not enabled", Toast.LENGTH_SHORT).show();
@@ -151,25 +163,8 @@ public class MainActivity extends Activity {
 
 	private void connectDevice(Intent data) {
 		String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-		mBluetoothService.connect(device);
+		Log.d(TAG, "Device address : " + address);
+		
+		setDetectEnabled(true, address);
 	}
-
-	private final Handler mHandler = new Handler () {
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what){
-			case MESSAGE_DEVICE_NAME:
-				break;
-			case MESSAGE_STATE_CHANGE:
-				break;
-			case MESSAGE_READ:
-			case MESSAGE_WRITE:
-				break;
-			case MESSAGE_TOAST:
-				Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
-				break;
-			}
-		}
-	};
 }
